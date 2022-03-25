@@ -11,6 +11,9 @@ import static ru.netology.web.data.DataHelper.getVerificationCodeFor;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LoginTest {
 
+LoginPageV1 loginPage = new LoginPageV1();
+DataHelper.AuthInfo authInfo = authInfo();
+
     @BeforeEach
     void setUp() {
         open("http://localhost:9999");
@@ -18,44 +21,50 @@ public class LoginTest {
 
     @AfterEach
     void close() {
+        clearBrowserCookies();
         closeWebDriver();
     }
 
-    @Order(3)
-    @Test
-    @DisplayName("a warning message should appear when entering an incorrect code")
-    void warningMessageShouldAppearWhenEnteringAnIncorrectCode() {
-        var loginPage = new LoginPageV1();
-        var verificationPage = loginPage.validLogin(authInfo());
-        verificationPage.invalidVerifyBlock();
-
-    }
-
     @Order(1)
-    @RepeatedTest(2)
+    @RepeatedTest(3)
     @DisplayName("must log in to your personal account")
     void mustLogInToYourPersonalAccount() {
-        var loginPage = new LoginPageV1();
-        var authInfo = authInfo();
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = getVerificationCodeFor(authInfo);
         verificationPage.validVerify(verificationCode);
-
     }
 
     @Order(2)
+    @RepeatedTest(3)
+    @DisplayName("a warning message should appear when entering an incorrect code")
+    void warningMessageShouldAppearWhenEnteringAnIncorrectCode() {
+        var verificationPage = loginPage.validLogin(authInfo);
+        verificationPage.invalidVerify();
+
+    }
+
+    @Order(3)
     @RepeatedTest(2)
     @DisplayName("a warning message should appear when entering the wrong code three times, the system is blocked")
     void warningMessageShouldAppearWhenEnteringWrongCodeThreeTimesSystemIsBlocked() {
-        var loginPage = new LoginPageV1();
-        var verificationPage = loginPage.validLogin(authInfo());
-        verificationPage.invalidVerify();
+        var verificationPage = loginPage.validLogin(authInfo);
+        verificationPage.invalidVerifyBlock();
+    }
+
+    @Order(4)
+    @RepeatedTest(2)
+    @DisplayName("must not log into your personal account")
+    void mustNotLogIntoYourPersonalAccount() {
+        var verificationPage = loginPage.validLogin(authInfo);
+        var verificationCode = getVerificationCodeFor(authInfo);
+        verificationPage.verifyBlock(verificationCode);
     }
 
     @AfterAll
     static void shouldTruncateTables() {
-        clearBrowserCookies();
         DataHelper.truncateTables();
 
     }
 }
+
+

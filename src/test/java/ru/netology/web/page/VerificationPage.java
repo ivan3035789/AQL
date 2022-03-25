@@ -18,8 +18,10 @@ public class VerificationPage {
     private final SelenideElement verifyButton = $("[data-test-id=action-verify]");
     @CacheLookup
     private final SelenideElement ConfirmationRequired = $("p");
+//    @CacheLookup
+//    private static final SelenideElement mistake = $("div.notification__content");
     @CacheLookup
-    private static final SelenideElement mistake = $("div.notification__content");
+    private static final SelenideElement mistake = $(".notification__title+.notification__content");
     @CacheLookup
     private final SelenideElement error = $("[data-test-id=error-notification] .notification__content");
 
@@ -37,7 +39,7 @@ public class VerificationPage {
     }
 
     public void invalidVerify() {
-        codeField.append(invalidCode(000000, 999999));
+        codeField.append(invalidCode(0, 999999));
         verifyButton.click();
         mistake.shouldBe(visible, Duration.ofSeconds(5));
         String expected = "Ошибка! Неверно указан код! Попробуйте ещё раз.";
@@ -45,8 +47,17 @@ public class VerificationPage {
         assertEquals(expected, actual);
     }
 
+    public void verifyBlock(DataHelper.VerificationCode verificationCode) {
+        codeField.append(verificationCode.getCode());
+        verifyButton.click();
+        error.shouldBe(visible, Duration.ofSeconds(5));
+        String expected = "Ошибка! Превышено количество попыток ввода кода!";
+        String actual = error.getText().trim();
+        assertEquals(expected, actual);
+    }
+
     public void invalidVerifyBlock() {
-        codeField.append(invalidCode(000000, 9999999));
+        codeField.append(invalidCode(0, 999999));
         verifyButton.click();
         error.shouldBe(visible, Duration.ofSeconds(5));
         String expected = "Ошибка! Превышено количество попыток ввода кода!";
