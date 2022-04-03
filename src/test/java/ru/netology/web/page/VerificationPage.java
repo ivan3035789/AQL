@@ -15,18 +15,16 @@ public class VerificationPage {
     @CacheLookup
     private final SelenideElement codeField = $("[data-test-id=code] input");
     @CacheLookup
-    private final SelenideElement verifyButton = $("[data-test-id=action-verify]");
+    private final SelenideElement button = $("[data-test-id=action-verify]");
     @CacheLookup
     private final SelenideElement ConfirmationRequired = $("p");
 //    @CacheLookup
-//    private static final SelenideElement mistake = $("div.notification__content");
-    @CacheLookup
-    private static final SelenideElement mistake = $(".notification__title+.notification__content");
+//    private final SelenideElement mistake = $("[data-test-id=error-notification] .notification__title+.notification__content");
     @CacheLookup
     private final SelenideElement error = $("[data-test-id=error-notification] .notification__content");
 
     public VerificationPage() {
-        codeField.shouldBe(visible, Duration.ofSeconds(5));
+        codeField.shouldBe(visible, Duration.ofSeconds(15));
         String expected = "Необходимо подтверждение";
         String actual = ConfirmationRequired.getText().trim();
         assertEquals(expected, actual);
@@ -34,23 +32,23 @@ public class VerificationPage {
 
     public DashboardPage validVerify(DataHelper.VerificationCode verificationCode) {
         codeField.append(verificationCode.getCode());
-        verifyButton.click();
+        button.click();
         return new DashboardPage();
     }
 
     public void invalidVerify() {
         codeField.append(invalidCode(0, 999999));
-        verifyButton.click();
-        mistake.shouldBe(visible, Duration.ofSeconds(5));
+        button.click();
+        error.shouldBe(visible, Duration.ofSeconds(15));
         String expected = "Ошибка! Неверно указан код! Попробуйте ещё раз.";
-        String actual = mistake.getText().trim();
+        String actual = error.getText().trim();
         assertEquals(expected, actual);
     }
 
     public void verifyBlock(DataHelper.VerificationCode verificationCode) {
         codeField.append(verificationCode.getCode());
-        verifyButton.click();
-        error.shouldBe(visible, Duration.ofSeconds(5));
+        button.click();
+        error.shouldBe(visible, Duration.ofSeconds(15));
         String expected = "Ошибка! Превышено количество попыток ввода кода!";
         String actual = error.getText().trim();
         assertEquals(expected, actual);
@@ -58,8 +56,8 @@ public class VerificationPage {
 
     public void invalidVerifyBlock() {
         codeField.append(invalidCode(0, 999999));
-        verifyButton.click();
-        error.shouldBe(visible, Duration.ofSeconds(5));
+        button.click();
+        error.shouldBe(visible, Duration.ofSeconds(15));
         String expected = "Ошибка! Превышено количество попыток ввода кода!";
         String actual = error.getText().trim();
         assertEquals(expected, actual);

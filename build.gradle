@@ -19,7 +19,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     testImplementation 'mysql:mysql-connector-java:8.0.28'
     testImplementation 'commons-dbutils:commons-dbutils:1.7'
-    testImplementation 'com.codeborne:selenide:6.3.4'
+    testImplementation 'com.codeborne:selenide:6.3.5'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 }
 

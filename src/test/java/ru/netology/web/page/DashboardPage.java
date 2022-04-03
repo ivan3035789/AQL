@@ -14,7 +14,7 @@ public class DashboardPage {
     private final SelenideElement heading = $("[data-test-id=dashboard]");
 
     public DashboardPage() {
-        heading.shouldBe(visible, Duration.ofSeconds(5));
+        heading.shouldBe(visible, Duration.ofSeconds(15));
         String expected = "Личный кабинет";
         String actual = heading.getText().trim();
         assertEquals(expected, actual);

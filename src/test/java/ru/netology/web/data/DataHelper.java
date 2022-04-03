@@ -51,7 +51,7 @@ public class DataHelper {
                         "jdbc:mysql://localhost:3306/app?allowPublicKeyRetrieval=true&useSSL=false", "app", "pass"
                 );
         ) {
-            var codeObject = runner.query(conn, sqlQuery, new ScalarHandler());
+            var codeObject = runner.query(conn, sqlQuery, new ScalarHandler<>());
             var codeString = codeObject.toString();
             return new VerificationCode(codeString);
         }
@@ -77,6 +77,19 @@ public class DataHelper {
             dataStmtransactions.executeUpdate();
             dataStmtAuth.executeUpdate();
             dataStmtUsers.executeUpdate();
+        }
+    }
+
+    @SneakyThrows
+    public static void deleteCodes() {
+        var dataSQLAuth = "DELETE FROM auth_codes;";
+        try (
+                var conn = DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/app?allowPublicKeyRetrieval=true&useSSL=false", "app", "pass"
+                );
+                var dataStmtAuth = conn.prepareStatement(dataSQLAuth);
+        ) {
+            dataStmtAuth.executeUpdate();
         }
     }
 
