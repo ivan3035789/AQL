@@ -6,13 +6,19 @@ import ru.netology.web.data.DataHelper;
 import ru.netology.web.page.LoginPageV1;
 
 import static com.codeborne.selenide.Selenide.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.netology.web.data.DataHelper.*;
+import static ru.netology.web.data.DataHelper.authInfoOnlyVasya;
+
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LoginTest {
 
-LoginPageV1 loginPage = new LoginPageV1();
-DataHelper.AuthInfo authInfo = authInfo();
+    LoginPageV1 loginPage = new LoginPageV1();
+    DataHelper.AuthInfo authInfoRandomLogin = authInfo();
+    String status = userStatus();
+    DataHelper.AuthInfo authInfoOnlyVasya = authInfoOnlyVasya();
+
 
     @BeforeEach
     void setUp() {
@@ -34,42 +40,53 @@ DataHelper.AuthInfo authInfo = authInfo();
     @RepeatedTest(3)
     @DisplayName("must log in to your personal account")
     void mustLogInToYourPersonalAccount() {
-        val verificationPage = loginPage.validLogin(authInfo);
-        val verificationCode = getVerificationCodeFor(authInfo);
+        val verificationPage = loginPage.validLogin(authInfoRandomLogin);
+        val verificationCode = getVerificationCodeFor(authInfoRandomLogin);
+
         verificationPage.validVerify(verificationCode);
+        assertEquals("active", status);
+        DataHelper.auth_codes();
+        clearBrowserCookies();
     }
 
     @Order(2)
     @RepeatedTest(3)
     @DisplayName("a warning message should appear when entering an incorrect code")
     void warningMessageShouldAppearWhenEnteringAnIncorrectCode() {
-        val verificationPage = loginPage.validLogin(authInfo);
+        val verificationPage = loginPage.validLogin(authInfoOnlyVasya);
+
         verificationPage.invalidVerify();
+        assertEquals("active", status);
     }
 
     @Order(3)
-    @RepeatedTest(3)
-    @DisplayName("a warning message should appear when entering the wrong code three times, the system is blocked")
-    void warningMessageShouldAppearWhenEnteringWrongCodeThreeTimesSystemIsBlocked() {
-        val verificationPage = loginPage.validLogin(authInfo);
-        verificationPage.invalidVerifyBlock();
+    @Test
+    @DisplayName("a warning message should appear about exceeding the number of incorrect code entries the user should be blocked")
+    void aWarningMessageShouldAppearAboutExceedingTheNumberOfIncorrectCodeEntriesTheUserShouldBeBlocked() {
+        val verificationPage = loginPage.validLogin(authInfoOnlyVasya);
+        val verificationCode = getVerificationCodeFor(authInfoOnlyVasya);
+
+        verificationPage.verifyBlock(verificationCode);
+        assertEquals("block", status);
     }
 
     @Order(4)
     @RepeatedTest(3)
-    @DisplayName("must not log into your personal valid code account")
-    void mustNotLogIntoYourPersonalValidCodeAccount() {
-        val verificationPage = loginPage.validLogin(authInfo);
-        val verificationCode = getVerificationCodeFor(authInfo);
-        verificationPage.verifyBlock(verificationCode);
+    @DisplayName("A warning message should appear if the password is entered incorrectly")
+    void aWarningMessageShouldAppearIfThePasswordIsEnteredIncorrectly() {
+        loginPage.invalidPassword(invalidPasswordAuthInfo());
+        assertEquals("active", status);
     }
 
     @Order(5)
     @Test
-    @DisplayName("must not log into your personal account invalid code")
-    void mustNotLogIntoYourPersonalAccountInvalidCode() {
-        val verificationPage = loginPage.validLogin(authInfo);
-        verificationPage.invalidVerifyBlock();
+    @DisplayName("The user must be blocked")
+    void theUserMustBeBlocked() {
+        val verificationPage = loginPage.validLogin(authInfoRandomLogin);
+        val verificationCode = getVerificationCodeFor(authInfoRandomLogin);
+
+        verificationPage.verifyBlock(verificationCode);
+        assertEquals("block", status);
     }
 }
 

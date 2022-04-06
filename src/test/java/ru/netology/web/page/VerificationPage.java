@@ -9,7 +9,7 @@ import java.time.Duration;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.netology.web.data.DataHelper.invalidCode;
+import static ru.netology.web.data.DataHelper.*;
 
 public class VerificationPage {
     @CacheLookup
@@ -17,17 +17,14 @@ public class VerificationPage {
     @CacheLookup
     private final SelenideElement button = $("[data-test-id=action-verify]");
     @CacheLookup
-    private final SelenideElement ConfirmationRequired = $("p");
-//    @CacheLookup
-//    private final SelenideElement mistake = $("[data-test-id=error-notification] .notification__title+.notification__content");
+    private final SelenideElement confirmationRequired = $("p");
     @CacheLookup
     private final SelenideElement error = $("[data-test-id=error-notification] .notification__content");
 
+
     public VerificationPage() {
         codeField.shouldBe(visible, Duration.ofSeconds(15));
-        String expected = "Необходимо подтверждение";
-        String actual = ConfirmationRequired.getText().trim();
-        assertEquals(expected, actual);
+        assertEquals("Необходимо подтверждение", confirmationRequired.getText().trim());
     }
 
     public DashboardPage validVerify(DataHelper.VerificationCode verificationCode) {
@@ -37,29 +34,16 @@ public class VerificationPage {
     }
 
     public void invalidVerify() {
-        codeField.append(invalidCode(0, 999999));
+        codeField.append(invalidCode(0, 9999));
         button.click();
         error.shouldBe(visible, Duration.ofSeconds(15));
-        String expected = "Ошибка! Неверно указан код! Попробуйте ещё раз.";
-        String actual = error.getText().trim();
-        assertEquals(expected, actual);
+        assertEquals("Ошибка! Неверно указан код! Попробуйте ещё раз.", error.getText().trim());
     }
 
     public void verifyBlock(DataHelper.VerificationCode verificationCode) {
         codeField.append(verificationCode.getCode());
         button.click();
         error.shouldBe(visible, Duration.ofSeconds(15));
-        String expected = "Ошибка! Превышено количество попыток ввода кода!";
-        String actual = error.getText().trim();
-        assertEquals(expected, actual);
-    }
-
-    public void invalidVerifyBlock() {
-        codeField.append(invalidCode(0, 999999));
-        button.click();
-        error.shouldBe(visible, Duration.ofSeconds(15));
-        String expected = "Ошибка! Превышено количество попыток ввода кода!";
-        String actual = error.getText().trim();
-        assertEquals(expected, actual);
+        assertEquals("Ошибка! Превышено количество попыток ввода кода!", error.getText().trim());
     }
 }

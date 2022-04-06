@@ -15,9 +15,7 @@ public class DashboardPage {
 
     public DashboardPage() {
         heading.shouldBe(visible, Duration.ofSeconds(15));
-        String expected = "Личный кабинет";
-        String actual = heading.getText().trim();
-        assertEquals(expected, actual);
+        assertEquals("Личный кабинет", heading.getText().trim());
     }
 
 }

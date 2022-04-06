@@ -1,6 +1,9 @@
 package ru.netology.web.data;
 
-import lombok.*;
+import com.github.javafaker.Faker;
+import lombok.SneakyThrows;
+import lombok.Value;
+import lombok.val;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
@@ -38,6 +41,21 @@ public class DataHelper {
         return new AuthInfo(login, password);
     }
 
+    public static AuthInfo authInfoOnlyVasya() {
+        String[] validLogin = {"vasya", "petya"};
+        String[] validPassword = {"qwerty123", "123qwerty"};
+        String login = validLogin[0];
+        String password = validPassword[0];
+        return new AuthInfo(login, password);
+    }
+
+    public static AuthInfo invalidPasswordAuthInfo() {
+        String[] validLogin = {"vasya", "petya"};
+        Faker faker = new Faker();
+        return new AuthInfo(validLogin[0], faker.internet().password());
+    }
+
+
     @SneakyThrows
     public static VerificationCode getVerificationCodeFor(AuthInfo authInfo) {
         String[] codeSQL = {"SELECT ac.code FROM auth_codes ac , users u where u.login ='vasya' AND u.id =ac.user_id ORDER by ac.created DESC LIMIT 1;",
@@ -45,33 +63,49 @@ public class DataHelper {
                         " ORDER BY ac.created DESC LIMIT 1;"
         };
         String sqlQuery = authInfo.login.equals("vasya") ? codeSQL[0] : codeSQL[1];
-        var runner = new QueryRunner();
+        val runner = new QueryRunner();
         try (
-                var conn = DriverManager.getConnection(
+                val conn = DriverManager.getConnection(
                         "jdbc:mysql://localhost:3306/app?allowPublicKeyRetrieval=true&useSSL=false", "app", "pass"
                 );
         ) {
-            var codeObject = runner.query(conn, sqlQuery, new ScalarHandler<>());
-            var codeString = codeObject.toString();
+            val codeObject = runner.query(conn, sqlQuery, new ScalarHandler<>());
+            val codeString = codeObject.toString();
             return new VerificationCode(codeString);
         }
 
     }
 
     @SneakyThrows
-    public static void truncateTables() {
-        var dataSQLAuth = "DELETE FROM auth_codes;";
-        var dataSQLUsers = "DELETE FROM users;";
-        var dataSQLCards = "DELETE FROM cards;";
-        var dataSQLTransactions = "DELETE FROM card_transactions;";
+    public static String userStatus() {
+        String status;
+        val selectSQL = "SELECT status FROM users WHERE login = ?;";
+        val runner = new QueryRunner();
+
         try (
-                var conn = DriverManager.getConnection(
+                val conn = DriverManager.getConnection(
                         "jdbc:mysql://localhost:3306/app?allowPublicKeyRetrieval=true&useSSL=false", "app", "pass"
                 );
-                var dataStmtCards = conn.prepareStatement(dataSQLCards);
-                var dataStmtransactions = conn.prepareStatement(dataSQLTransactions);
-                var dataStmtAuth = conn.prepareStatement(dataSQLAuth);
-                var dataStmtUsers = conn.prepareStatement(dataSQLUsers);
+        ) {
+            status = runner.query(conn, selectSQL, new ScalarHandler<>(), authInfo().login);
+        }
+        return status;
+    }
+
+    @SneakyThrows
+    public static void truncateTables() {
+        val dataSQLAuth = "DELETE FROM auth_codes;";
+        val dataSQLUsers = "DELETE FROM users;";
+        val dataSQLCards = "DELETE FROM cards;";
+        val dataSQLTransactions = "DELETE FROM card_transactions;";
+        try (
+                val conn = DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/app?allowPublicKeyRetrieval=true&useSSL=false", "app", "pass"
+                );
+                val dataStmtCards = conn.prepareStatement(dataSQLCards);
+                val dataStmtransactions = conn.prepareStatement(dataSQLTransactions);
+                val dataStmtAuth = conn.prepareStatement(dataSQLAuth);
+                val dataStmtUsers = conn.prepareStatement(dataSQLUsers);
         ) {
             dataStmtCards.executeUpdate();
             dataStmtransactions.executeUpdate();
@@ -81,8 +115,8 @@ public class DataHelper {
     }
 
     @SneakyThrows
-    public static void deleteCodes() {
-        var dataSQLAuth = "DELETE FROM auth_codes;";
+    public static void auth_codes() {
+        val dataSQLAuth = "DELETE FROM auth_codes;";
         try (
                 var conn = DriverManager.getConnection(
                         "jdbc:mysql://localhost:3306/app?allowPublicKeyRetrieval=true&useSSL=false", "app", "pass"
@@ -92,5 +126,4 @@ public class DataHelper {
             dataStmtAuth.executeUpdate();
         }
     }
-
 }
