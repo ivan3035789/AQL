@@ -61,13 +61,13 @@ public class LoginTest {
 
     @Order(3)
     @Test
-    @DisplayName("a warning message should appear about exceeding the number of incorrect code entries the user should be blocked")
-    void aWarningMessageShouldAppearAboutExceedingTheNumberOfIncorrectCodeEntriesTheUserShouldBeBlocked() {
+    @DisplayName("a warning message should appear about exceeding the number of incorrect code entries")
+    void aWarningMessageShouldAppearAboutExceedingTheNumberOfIncorrectCodeEntries() {
         val verificationPage = loginPage.validLogin(authInfoOnlyVasya);
         val verificationCode = getVerificationCodeFor(authInfoOnlyVasya);
 
         verificationPage.verifyBlock(verificationCode);
-        assertEquals("block", status);
+        assertEquals("active", status);
     }
 
     @Order(4)
